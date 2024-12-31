@@ -1,4 +1,4 @@
-name: Release Application Code and Push Docker Image
+name: Release Application Code and Publish Docker Image
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10' 
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
@@ -46,9 +46,27 @@ jobs:
       run: |
         docker push ghcr.io/${{ github.repository }}/my-app:${{ github.sha }}
 
-    - name: Create GitHub release and upload the zip file
-      uses: softprops/action-gh-release@v1
-      with:
-        files: app_code_${{ github.sha }}.zip 
+    - name: Set outputs
+      id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.vars.outputs.sha_short }}
+        release_name: "Release ${{ steps.vars.outputs.sha_short }}"
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./app_code_${{ github.sha }}.zip 
+        asset_name: app_code_${{ github.sha }}.zip  
+        asset_content_type: application/zip
