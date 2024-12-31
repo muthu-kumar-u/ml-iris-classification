@@ -40,11 +40,11 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t ghcr.io/${{ github.repository }}/my-app:${{ github.sha }} .
+        docker build -t ghcr.io/${{ github.repository }}/iris-classification:${{ github.sha }} .
 
     - name: Push Docker image to GitHub Container Registry
       run: |
-        docker push ghcr.io/${{ github.repository }}/my-app:${{ github.sha }}
+        docker push ghcr.io/${{ github.repository }}/iris-classification:${{ github.sha }}
 
     - name: Set outputs
       id: vars
